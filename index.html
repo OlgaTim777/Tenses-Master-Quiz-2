@@ -1,0 +1,911 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Interactive English Tenses Quiz - Test your knowledge of Present, Past, and Perfect tenses">
+  <meta name="keywords" content="English, grammar, tenses, quiz, learning">
+  <meta name="author" content="Master English">
+  <title>English Tenses Quiz - Three Rounds Challenge</title>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #ffffff;
+    }
+
+    .quiz-wrapper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      background: url('https://i.imgur.com/xYJIXGn.png') center center / cover no-repeat;
+    }
+    
+    .background::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(102, 126, 234, 0.3);
+    }
+
+    .floating-emoji {
+      position: absolute;
+      font-size: 2rem;
+      opacity: 0.6;
+      animation: float 20s infinite ease-in-out;
+      z-index: 1;
+      pointer-events: none;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0) translateX(0) rotate(0deg);
+      }
+      25% {
+        transform: translateY(-40px) translateX(30px) rotate(10deg);
+      }
+      50% {
+        transform: translateY(-80px) translateX(-30px) rotate(-10deg);
+      }
+      75% {
+        transform: translateY(-40px) translateX(30px) rotate(10deg);
+      }
+    }
+
+    .content {
+      position: relative;
+      z-index: 2;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+      min-height: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .content {
+        padding: 1rem;
+      }
+      
+      .title {
+        font-size: 2rem;
+      }
+      
+      .subtitle {
+        font-size: 1rem;
+      }
+      
+      .question-card {
+        padding: 1.5rem;
+      }
+      
+      .round-tracker {
+        gap: 0.5rem;
+      }
+      
+      .round-badge {
+        min-width: 120px;
+        padding: 0.75rem 1rem;
+      }
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .title {
+      font-size: 2.8rem;
+      margin: 0 0 1rem 0;
+      text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+      font-weight: 700;
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      opacity: 0.95;
+    }
+
+    .round-tracker {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin: 2rem 0;
+      flex-wrap: wrap;
+    }
+
+    .round-badge {
+      padding: 1rem 1.5rem;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.3s ease;
+      min-width: 150px;
+      text-align: center;
+    }
+
+    .round-badge.active {
+      background: rgba(255, 255, 255, 0.35);
+      border-color: rgba(255, 255, 255, 0.6);
+      transform: scale(1.1);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .round-badge.completed {
+      background: rgba(76, 175, 80, 0.3);
+      border-color: rgba(76, 175, 80, 0.6);
+    }
+
+    .round-number {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-bottom: 0.3rem;
+    }
+
+    .round-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .round-score {
+      font-size: 0.85rem;
+      margin-top: 0.3rem;
+      opacity: 0.9;
+    }
+
+    .progress-bar-container {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      height: 30px;
+      margin: 2rem 0;
+      overflow: hidden;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #4caf50, #8bc34a);
+      border-radius: 20px;
+      transition: width 0.5s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+      box-shadow: 0 2px 8px rgba(76, 175, 80, 0.4);
+    }
+
+    .screen {
+      display: none;
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1.1rem;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.9);
+      color: #333;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      transform: scale(1.02);
+      border-color: rgba(255, 255, 255, 0.6);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+
+    .start-btn {
+      display: block;
+      margin: 2rem auto 0;
+      padding: 1.2rem 3rem;
+      font-size: 1.3rem;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      font-weight: 700;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .start-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .question-card {
+      padding: 2.5rem;
+      border-radius: 20px;
+      margin-bottom: 2rem;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(15px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .round-header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+    }
+
+    .round-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .round-description {
+      font-size: 1rem;
+      opacity: 0.9;
+    }
+
+    .question-number {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      opacity: 0.9;
+      font-weight: 600;
+    }
+
+    .question-text {
+      font-size: 1.5rem;
+      margin-bottom: 2rem;
+      font-weight: 500;
+      line-height: 1.6;
+    }
+
+    .answers {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .answer-btn {
+      padding: 1.2rem 1.5rem;
+      font-size: 1.1rem;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: left;
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.9);
+      color: #333;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .answer-btn:hover:not(:disabled) {
+      transform: translateX(8px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+      background: rgba(255, 255, 255, 1);
+    }
+
+    .answer-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .answer-btn.correct {
+      animation: correctPulse 0.6s ease;
+      background: linear-gradient(135deg, #4caf50, #8bc34a);
+      color: white;
+      border-color: #4caf50;
+    }
+
+    .answer-btn.incorrect {
+      animation: incorrectShake 0.5s ease;
+      background: linear-gradient(135deg, #f44336, #e91e63);
+      color: white;
+      border-color: #f44336;
+    }
+
+    @keyframes correctPulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+    }
+
+    @keyframes incorrectShake {
+      0%, 100% {
+        transform: translateX(0);
+      }
+      25% {
+        transform: translateX(-10px);
+      }
+      75% {
+        transform: translateX(10px);
+      }
+    }
+
+    .next-btn {
+      display: block;
+      margin: 2rem auto 0;
+      padding: 1rem 2.5rem;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .next-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .next-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .completion-screen {
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .trophy {
+      font-size: 6rem;
+      margin: 2rem 0;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-20px);
+      }
+    }
+
+    .final-score {
+      font-size: 3.5rem;
+      margin: 2rem 0;
+      font-weight: 700;
+      text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .score-breakdown {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin: 2rem 0;
+      flex-wrap: wrap;
+    }
+
+    .round-result {
+      padding: 1.5rem;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      min-width: 180px;
+    }
+
+    .round-result-title {
+      font-size: 1rem;
+      opacity: 0.9;
+      margin-bottom: 0.5rem;
+    }
+
+    .round-result-score {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .completion-message {
+      font-size: 1.5rem;
+      margin: 2rem 0;
+      line-height: 1.6;
+    }
+
+    .restart-btn {
+      margin-top: 2rem;
+      padding: 1.2rem 3rem;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .restart-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .celebration-emojis {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    .celebration-emoji {
+      position: absolute;
+      font-size: 3rem;
+      animation: fall 4s ease-in forwards;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(120vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    .card-welcome {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(15px);
+      padding: 3rem;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="quiz-wrapper">
+   <div class="background" id="background"></div>
+   <div class="content">
+    <div class="header">
+     <div class="title">
+      🎯 Three Rounds Tenses Challenge 🏆
+     </div>
+     <div class="subtitle"><a href="https://vk.com/club221025676" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; color: inherit;"> <img src="https://i.imgur.com/QC0aRsL.jpeg" alt="Master Logo" style="width: 40px; height: 40px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); vertical-align: middle;"> <span>Master</span> </a> Present, Past, and Perfect tenses across three exciting rounds!
+     </div>
+    </div><!-- Round Tracker -->
+    <div class="round-tracker" id="roundTracker" style="display: none;">
+     <div class="round-badge" id="round1Badge">
+      <div class="round-number">
+       Round 1
+      </div>
+      <div class="round-name">
+       Present Tenses
+      </div>
+      <div class="round-score" id="round1Score"></div>
+     </div>
+     <div class="round-badge" id="round2Badge">
+      <div class="round-number">
+       Round 2
+      </div>
+      <div class="round-name">
+       Past Tenses
+      </div>
+      <div class="round-score" id="round2Score"></div>
+     </div>
+     <div class="round-badge" id="round3Badge">
+      <div class="round-number">
+       Round 3
+      </div>
+      <div class="round-name">
+       Perfect vs Past
+      </div>
+      <div class="round-score" id="round3Score"></div>
+     </div>
+    </div><!-- Progress Bar -->
+    <div class="progress-bar-container" id="progressContainer" style="display: none;">
+     <div class="progress-bar" id="progressBar">
+      0%
+     </div>
+    </div><!-- Welcome Screen -->
+    <div class="screen active" id="welcomeScreen">
+     <div class="card-welcome">
+      <div class="form-group"><label for="studentName">👤 Enter Your Name:</label> <input type="text" id="studentName" placeholder="Your name here...">
+      </div>
+      <div style="margin: 2rem 0; padding: 1.5rem; background: rgba(255, 255, 255, 0.1); border-radius: 15px;">
+       <h3 style="margin-bottom: 1rem; font-size: 1.3rem;">📋 Quiz Structure:</h3>
+       <p style="margin-bottom: 0.5rem;">🔹 <strong>Round 1:</strong> Present Simple vs Present Continuous (10 questions)</p>
+       <p style="margin-bottom: 0.5rem;">🔹 <strong>Round 2:</strong> Past Simple vs Past Continuous (10 questions)</p>
+       <p>🔹 <strong>Round 3:</strong> Present Perfect vs Past Simple (10 questions)</p>
+      </div><button class="start-btn" id="startBtn">🚀 Start Quiz</button>
+     </div>
+    </div><!-- Quiz Screen -->
+    <div class="screen" id="quizScreen">
+     <div class="round-header" id="roundHeader">
+      <div class="round-title" id="roundTitle"></div>
+      <div class="round-description" id="roundDescription"></div>
+     </div>
+     <div class="question-card">
+      <div class="question-number" id="questionNumber"></div>
+      <div class="question-text" id="questionText"></div>
+      <div class="answers" id="answersContainer"></div><button class="next-btn" id="nextBtn" disabled>Next Question ➡️</button>
+     </div>
+    </div><!-- Completion Screen -->
+    <div class="screen" id="completionScreen">
+     <div class="completion-screen">
+      <div class="trophy" id="trophyEmoji">
+       🏆
+      </div>
+      <div class="final-score" id="finalScore"></div>
+      <div class="completion-message" id="completionMessage"></div>
+      <div class="score-breakdown">
+       <div class="round-result">
+        <div class="round-result-title">
+         Round 1: Present
+        </div>
+        <div class="round-result-score" id="finalRound1"></div>
+       </div>
+       <div class="round-result">
+        <div class="round-result-title">
+         Round 2: Past
+        </div>
+        <div class="round-result-score" id="finalRound2"></div>
+       </div>
+       <div class="round-result">
+        <div class="round-result-title">
+         Round 3: Perfect
+        </div>
+        <div class="round-result-score" id="finalRound3"></div>
+       </div>
+      </div><button class="restart-btn" id="restartBtn">🔄 Take Quiz Again</button>
+     </div>
+    </div>
+   </div>
+   <div class="celebration-emojis" id="celebrationContainer"></div>
+  </div>
+  <script>
+    const rounds = [
+      {
+        name: "Present Simple vs Present Continuous",
+        description: "Choose the correct present tense form",
+        questions: [
+          { question: "I usually ___ coffee in the morning.", answers: ["drink", "am drinking", "drinks", "drinking"], correct: 0 },
+          { question: "She ___ to music right now.", answers: ["listens", "is listening", "listen", "listening"], correct: 1 },
+          { question: "They ___ a movie at the moment.", answers: ["watch", "watches", "are watching", "watching"], correct: 2 },
+          { question: "He ___ English every day.", answers: ["study", "studies", "is studying", "studying"], correct: 1 },
+          { question: "We ___ for the bus right now.", answers: ["wait", "waits", "are waiting", "waiting"], correct: 2 },
+          { question: "___ you ___ what I mean?", answers: ["Do / understand", "Are / understanding", "Does / understand", "Is / understanding"], correct: 0 },
+          { question: "She ___ her homework at the moment.", answers: ["doesn't do", "isn't doing", "don't do", "aren't doing"], correct: 1 },
+          { question: "What ___ your brother ___ for a living?", answers: ["does / do", "is / doing", "do / do", "are / doing"], correct: 0 },
+          { question: "The children ___ outside because it's raining.", answers: ["don't play", "aren't playing", "doesn't play", "isn't playing"], correct: 1 },
+          { question: "Why ___ she always ___ late?", answers: ["does / arrive", "is / arriving", "do / arrive", "are / arriving"], correct: 0 }
+        ]
+      },
+      {
+        name: "Past Simple vs Past Continuous",
+        description: "Choose the correct past tense form",
+        questions: [
+          { question: "I ___ TV when you called.", answers: ["watched", "was watching", "watch", "am watching"], correct: 1 },
+          { question: "She ___ to Paris last summer.", answers: ["was going", "goes", "went", "is going"], correct: 2 },
+          { question: "They ___ dinner when the power went out.", answers: ["had", "have", "were having", "are having"], correct: 2 },
+          { question: "He ___ his homework yesterday.", answers: ["was finishing", "finishes", "finished", "is finishing"], correct: 2 },
+          { question: "While I ___ home, it started to rain.", answers: ["walked", "was walking", "walk", "am walking"], correct: 1 },
+          { question: "___ you ___ the news yesterday?", answers: ["Did / hear", "Were / hearing", "Do / hear", "Are / hearing"], correct: 0 },
+          { question: "We ___ to the party because we were tired.", answers: ["didn't go", "weren't going", "don't go", "aren't going"], correct: 0 },
+          { question: "What ___ you ___ at 8 PM last night?", answers: ["did / do", "were / doing", "do / do", "are / doing"], correct: 1 },
+          { question: "They ___ football when it started snowing.", answers: ["played", "were playing", "play", "are playing"], correct: 1 },
+          { question: "She ___ her phone because she was driving.", answers: ["didn't answer", "wasn't answering", "doesn't answer", "isn't answering"], correct: 0 }
+        ]
+      },
+      {
+        name: "Present Perfect vs Past Simple",
+        description: "Choose the correct tense - Perfect or Simple Past",
+        questions: [
+          { question: "I ___ this movie before.", answers: ["saw", "have seen", "see", "am seeing"], correct: 1 },
+          { question: "She ___ her keys yesterday.", answers: ["has lost", "loses", "lost", "is losing"], correct: 2 },
+          { question: "They ___ to London three times.", answers: ["went", "go", "have been", "are going"], correct: 2 },
+          { question: "He ___ his homework an hour ago.", answers: ["has finished", "finishes", "finished", "is finishing"], correct: 2 },
+          { question: "We ___ each other since 2010.", answers: ["knew", "know", "have known", "are knowing"], correct: 2 },
+          { question: "___ you ever ___ sushi?", answers: ["Did / eat", "Have / eaten", "Do / eat", "Are / eating"], correct: 1 },
+          { question: "I ___ my report yet.", answers: ["didn't finish", "haven't finished", "don't finish", "am not finishing"], correct: 1 },
+          { question: "When ___ she ___ her new job?", answers: ["has / started", "have / started", "did / start", "does / start"], correct: 2 },
+          { question: "They ___ married for 20 years now.", answers: ["were", "are", "have been", "had been"], correct: 2 },
+          { question: "We ___ to that restaurant last week.", answers: ["have gone", "have been", "went", "go"], correct: 2 }
+        ]
+      }
+    ];
+
+    let currentRound = 0;
+    let currentQuestion = 0;
+    let roundScores = [0, 0, 0];
+    let studentName = "";
+    let answeredCurrentQuestion = false;
+    let totalQuestions = 0;
+    let answeredQuestions = 0;
+
+    function createFloatingEmojis() {
+      const background = document.getElementById('background');
+      const emojis = ['❄️', '❄️', '❄️', '⛄', '❄️', '❄️', '⭐', '❄️'];
+      
+      for (let i = 0; i < 20; i++) {
+        const emoji = document.createElement('div');
+        emoji.className = 'floating-emoji';
+        emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        emoji.style.left = `${Math.random() * 100}%`;
+        emoji.style.top = `${Math.random() * 100}%`;
+        emoji.style.animationDelay = `${Math.random() * 5}s`;
+        emoji.style.animationDuration = `${15 + Math.random() * 10}s`;
+        background.appendChild(emoji);
+      }
+    }
+
+    function updateRoundTracker() {
+      for (let i = 0; i < 3; i++) {
+        const badge = document.getElementById(`round${i + 1}Badge`);
+        const scoreEl = document.getElementById(`round${i + 1}Score`);
+        
+        badge.classList.remove('active', 'completed');
+        
+        if (i < currentRound) {
+          badge.classList.add('completed');
+          scoreEl.textContent = `${roundScores[i]}/10 ✓`;
+        } else if (i === currentRound) {
+          badge.classList.add('active');
+          scoreEl.textContent = `${roundScores[i]}/10`;
+        } else {
+          scoreEl.textContent = '';
+        }
+      }
+    }
+
+    function updateProgressBar() {
+      const progress = (answeredQuestions / totalQuestions) * 100;
+      const progressBar = document.getElementById('progressBar');
+      progressBar.style.width = `${progress}%`;
+      progressBar.textContent = `${Math.round(progress)}%`;
+    }
+
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(screen => {
+        screen.classList.remove('active');
+      });
+      document.getElementById(screenId).classList.add('active');
+    }
+
+    function startQuiz() {
+      const nameInput = document.getElementById('studentName');
+      studentName = nameInput.value.trim();
+      
+      if (!studentName) {
+        nameInput.style.borderColor = '#f44336';
+        return;
+      }
+
+      totalQuestions = rounds.reduce((sum, round) => sum + round.questions.length, 0);
+      currentRound = 0;
+      currentQuestion = 0;
+      roundScores = [0, 0, 0];
+      answeredQuestions = 0;
+
+      document.getElementById('roundTracker').style.display = 'flex';
+      document.getElementById('progressContainer').style.display = 'block';
+      
+      updateRoundTracker();
+      updateProgressBar();
+      showScreen('quizScreen');
+      displayQuestion();
+    }
+
+    function displayQuestion() {
+      const round = rounds[currentRound];
+      const question = round.questions[currentQuestion];
+      
+      document.getElementById('roundTitle').textContent = `Round ${currentRound + 1}: ${round.name}`;
+      document.getElementById('roundDescription').textContent = round.description;
+      document.getElementById('questionNumber').textContent = `Question ${currentQuestion + 1} of ${round.questions.length}`;
+      document.getElementById('questionText').textContent = question.question;
+      
+      const answersContainer = document.getElementById('answersContainer');
+      answersContainer.innerHTML = '';
+      document.getElementById('nextBtn').disabled = true;
+      answeredCurrentQuestion = false;
+
+      question.answers.forEach((answer, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'answer-btn';
+        btn.textContent = answer;
+        btn.onclick = () => selectAnswer(index);
+        answersContainer.appendChild(btn);
+      });
+    }
+
+    function selectAnswer(selectedIndex) {
+      if (answeredCurrentQuestion) return;
+
+      const question = rounds[currentRound].questions[currentQuestion];
+      const answerBtns = document.querySelectorAll('.answer-btn');
+      answeredCurrentQuestion = true;
+      answeredQuestions++;
+
+      answerBtns.forEach((btn, index) => {
+        btn.disabled = true;
+        if (index === question.correct) {
+          btn.classList.add('correct');
+          btn.textContent += ' ✅';
+        } else if (index === selectedIndex) {
+          btn.classList.add('incorrect');
+          btn.textContent += ' ❌';
+        }
+      });
+
+      if (selectedIndex === question.correct) {
+        roundScores[currentRound]++;
+      }
+
+      updateRoundTracker();
+      updateProgressBar();
+      document.getElementById('nextBtn').disabled = false;
+    }
+
+    function nextQuestion() {
+      currentQuestion++;
+
+      if (currentQuestion < rounds[currentRound].questions.length) {
+        displayQuestion();
+      } else {
+        // Round completed
+        currentQuestion = 0;
+        currentRound++;
+
+        if (currentRound < rounds.length) {
+          // Start next round
+          displayQuestion();
+        } else {
+          // Quiz completed
+          showCompletion();
+        }
+      }
+    }
+
+    function showCompletion() {
+      const totalScore = roundScores.reduce((sum, score) => sum + score, 0);
+      const maxScore = totalQuestions;
+      const percentage = Math.round((totalScore / maxScore) * 100);
+
+      document.getElementById('finalScore').textContent = `${totalScore} / ${maxScore} (${percentage}%)`;
+      document.getElementById('finalRound1').textContent = `${roundScores[0]}/10`;
+      document.getElementById('finalRound2').textContent = `${roundScores[1]}/10`;
+      document.getElementById('finalRound3').textContent = `${roundScores[2]}/10`;
+
+      const trophyEmoji = document.getElementById('trophyEmoji');
+      const completionMessage = document.getElementById('completionMessage');
+
+      if (percentage === 100) {
+        trophyEmoji.textContent = '🏆';
+        completionMessage.textContent = `Perfect score, ${studentName}! You're a true grammar master! 🌟`;
+        createCelebration(['🎉', '🎊', '⭐', '🏆', '✨']);
+      } else if (percentage >= 80) {
+        trophyEmoji.textContent = '🥇';
+        completionMessage.textContent = `Excellent work, ${studentName}! You have a strong grasp of English tenses! ��`;
+        createCelebration(['🎉', '⭐', '✨']);
+      } else if (percentage >= 60) {
+        trophyEmoji.textContent = '🥈';
+        completionMessage.textContent = `Good job, ${studentName}! Keep practicing to improve further! 📚`;
+      } else {
+        trophyEmoji.textContent = '📚';
+        completionMessage.textContent = `Keep learning, ${studentName}! Practice makes perfect! 💪`;
+      }
+
+      showScreen('completionScreen');
+    }
+
+    function createCelebration(emojiList = ['🎉']) {
+      const container = document.getElementById('celebrationContainer');
+      container.innerHTML = '';
+
+      for (let i = 0; i < 40; i++) {
+        setTimeout(() => {
+          const emoji = document.createElement('div');
+          emoji.className = 'celebration-emoji';
+          emoji.textContent = emojiList[Math.floor(Math.random() * emojiList.length)];
+          emoji.style.left = `${Math.random() * 100}%`;
+          emoji.style.animationDelay = '0s';
+          emoji.style.animationDuration = `${3 + Math.random() * 2}s`;
+          container.appendChild(emoji);
+
+          setTimeout(() => emoji.remove(), 5000);
+        }, i * 80);
+      }
+    }
+
+    function restartQuiz() {
+      currentRound = 0;
+      currentQuestion = 0;
+      roundScores = [0, 0, 0];
+      studentName = "";
+      answeredQuestions = 0;
+      document.getElementById('studentName').value = "";
+      document.getElementById('celebrationContainer').innerHTML = "";
+      document.getElementById('roundTracker').style.display = 'none';
+      document.getElementById('progressContainer').style.display = 'none';
+      showScreen('welcomeScreen');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      createFloatingEmojis();
+
+      document.getElementById('startBtn').addEventListener('click', startQuiz);
+      document.getElementById('nextBtn').addEventListener('click', nextQuestion);
+      document.getElementById('restartBtn').addEventListener('click', restartQuiz);
+    });
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b2fe34fb07af78c',t:'MTc2NjU3NzA5OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
